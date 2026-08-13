@@ -1,0 +1,530 @@
+# Atorch CW24 / CW20 WiFi DC Energy Meter (shunt_16s)
+#
+# Product Name (Tuya):  炬为电能表(CW24/CW20)
+# Device ID:            bfd9b22b8915ea3c71gddn
+# Product Category:     cz
+#
+# NOTE: "Device ID" above is the physical unit identifier, NOT the
+# Tuya SKU-level "Product ID" that this file's `products: - id:` field
+# normally expects. The SKU-level product_id was not confirmed via the
+# IoT Platform UI (only Device ID / Product Category were visible on the
+# Basic Information tab). Until confirmed, this device_id is used as a
+# stand-in match key — verify against `.storage/core.config_entries` on
+# the HA host, or the Tuya Cloud API `/v1.0/devices/{id}/` product_id
+# field, and replace below if a distinct SKU-level ID is found.
+#
+# DPS mapping confirmed via: Smart Life app UI correlation (voltage,
+# current, capacity fields) + Tuya IoT Platform "Device Logs" DP ID
+# extractor (code <-> dp_id pairs for 18,19,128,129,132,133,134,135,136).
+
+name: Atorch CW24 Energy Meter
+
+products:
+  - id: bfd9b22b8915ea3c71gddn
+    manufacturer: Atorch
+    model: CW24/CW20
+
+entities:
+  - entity: sensor
+    class: current
+    dps:
+      - id: 18
+        name: sensor
+        type: integer
+        class: measurement
+        unit: A
+        mapping:
+          - scale: 1000
+
+  - entity: sensor
+    class: power
+    dps:
+      - id: 19
+        name: sensor
+        type: integer
+        class: measurement
+        unit: W
+        mapping:
+          - scale: 100
+
+  - entity: sensor
+    class: voltage
+    dps:
+      - id: 20
+        name: sensor
+        type: integer
+        class: measurement
+        unit: V
+        mapping:
+          - scale: 100
+
+  - entity: switch
+    category: config
+    name: Relay control
+    dps:
+      - id: 102
+        type: boolean
+        name: switch
+
+  - entity: sensor
+    class: battery
+    dps:
+      - id: 103
+        name: sensor
+        type: integer
+        class: measurement
+        unit: "%"
+        mapping:
+          - scale: 10
+
+  - entity: number
+    category: config
+    name: Over voltage prompt
+    class: voltage
+    dps:
+      - id: 104
+        type: integer
+        name: value
+        unit: V
+        range:
+          min: 0
+          max: 42000
+        mapping:
+          - scale: 100
+
+  - entity: number
+    category: config
+    name: Over temperature prompt
+    class: temperature
+    dps:
+      - id: 105
+        type: integer
+        name: value
+        unit: C
+        range:
+          min: 1
+          max: 1500
+        mapping:
+          - scale: 10
+
+  - entity: number
+    category: config
+    name: Over power prompt
+    class: power
+    dps:
+      - id: 106
+        type: integer
+        name: value
+        unit: W
+        range:
+          min: 1
+          max: 252000
+
+  - entity: select
+    category: config
+    translation_key: language
+    dps:
+      - id: 107
+        type: string
+        name: option
+        mapping:
+          - dps_val: chinese
+            value: chinese
+          - dps_val: english
+            value: english
+
+  - entity: light
+    category: config
+    translation_key: display
+    dps:
+      - id: 108
+        type: integer
+        name: brightness
+        range:
+          min: 1
+          max: 9
+
+  - entity: light
+    category: config
+    name: Standby display
+    translation_key: display
+    dps:
+      - id: 109
+        type: integer
+        name: brightness
+        range:
+          min: 0
+          max: 9
+
+  - entity: number
+    category: config
+    class: duration
+    name: Display timeout
+    icon: "mdi:sun-clock"
+    dps:
+      - id: 110
+        type: integer
+        name: value
+        unit: s
+        range:
+          min: 3
+          max: 99
+
+  - entity: switch
+    name: Real time data refresh switch
+    category: config
+    dps:
+      - id: 101
+        type: boolean
+        name: switch
+
+  - entity: sensor
+    name: Discharge current
+    category: diagnostic
+    dps:
+      - id: 111
+        name: sensor
+        type: integer
+        class: measurement
+        unit: A
+        optional: true
+        mapping:
+          - scale: 1000
+
+  - entity: sensor
+    name: Discharge power
+    category: diagnostic
+    dps:
+      - id: 112
+        name: sensor
+        type: integer
+        class: measurement
+        unit: W
+        optional: true
+        mapping:
+          - scale: 100
+
+  - entity: button
+    name: Reset data
+    category: config
+    class: restart
+    dps:
+      - id: 113
+        type: boolean
+        name: button
+        optional: true
+
+  - entity: button
+    name: Reset Wi-Fi
+    category: config
+    class: restart
+    hidden: true
+    dps:
+      - id: 114
+        type: boolean
+        name: button
+        optional: true
+
+  - entity: button
+    translation_key: factory_reset
+    category: config
+    hidden: true
+    dps:
+      - id: 115
+        type: boolean
+        name: button
+        optional: true
+
+  - entity: button
+    name: Zero no-load current
+    category: config
+    icon: "mdi:current-dc"
+    dps:
+      - id: 116
+        type: boolean
+        name: button
+        optional: true
+
+  - entity: select
+    name: Device Interface
+    icon: "mdi:menu"
+    category: config
+    dps:
+      - id: 118
+        type: string
+        name: option
+        mapping:
+          - dps_val: front
+            value: Measurement
+          - dps_val: back
+            value: Settings
+          - dps_val: display_off
+            value: "Off"
+
+  - entity: number
+    name: Low voltage prompt
+    category: config
+    class: voltage
+    dps:
+      - id: 119
+        type: integer
+        optional: true
+        name: value
+        unit: V
+        range:
+          min: 0
+          max: 42000
+        mapping:
+          - scale: 100
+
+  - entity: number
+    name: 100% Battery Voltage
+    category: config
+    class: voltage
+    icon: "mdi:battery-high"
+    dps:
+      - id: 117
+        type: integer
+        optional: true
+        name: value
+        unit: V
+        range:
+          min: 0
+          max: 42000
+        mapping:
+          - scale: 100
+
+  - entity: number
+    name: 0% Battery Voltage
+    category: config
+    class: voltage
+    icon: "mdi:battery-outline"
+    dps:
+      - id: 120
+        type: integer
+        optional: true
+        name: value
+        unit: V
+        range:
+          min: 0
+          max: 42000
+        mapping:
+          - scale: 100
+
+  - entity: number
+    category: config
+    name: Mini measure amp
+    icon: "mdi:resize-bottom-right"
+    dps:
+      - id: 121
+        type: integer
+        name: value
+        unit: mA
+        range:
+          min: 2
+          max: 99
+
+  - entity: sensor
+    category: diagnostic
+    class: temperature
+    dps:
+      - id: 122
+        name: sensor
+        type: integer
+        class: measurement
+        unit: C
+        mapping:
+          - scale: 10
+
+  - entity: sensor
+    class: energy
+    dps:
+      - id: 123
+        name: sensor
+        type: integer
+        class: total_increasing
+        unit: kWh
+        mapping:
+          - scale: 1000
+
+  - entity: select
+    name: Capacity metering mode
+    icon: "mdi:swap-vertical-circle-outline"
+    category: config
+    dps:
+      - id: 124
+        type: string
+        name: option
+        optional: true
+        mapping:
+          - dps_val: actual_cap
+            value: "C+D- (actual capacity, charge adds / discharge subtracts)"
+          # Second mode's dps_val (C+D+, cumulative) not yet confirmed —
+          # capture it by switching the mode on the device/app while
+          # polling DP 124, then add the mapping here.
+
+  - entity: number
+    category: config
+    name: Data refresh interval
+    class: duration
+    icon: "mdi:timer-refresh-outline"
+    dps:
+      - id: 125
+        type: integer
+        optional: true
+        name: value
+        unit: s
+        range:
+          min: 1
+          max: 90
+
+  # --- CW24-specific DPS, not present in the base DT20HBW profile ---
+
+  - entity: sensor
+    name: Charging capacity
+    dps:
+      - id: 126
+        name: sensor
+        type: integer
+        class: total_increasing
+        unit: Ah
+        mapping:
+          - scale: 1000
+
+  - entity: sensor
+    name: Discharge capacity
+    dps:
+      - id: 127
+        name: sensor
+        type: integer
+        class: total_increasing
+        unit: Ah
+        mapping:
+          - scale: 1000
+
+  - entity: sensor
+    name: Accumulated capacity
+    dps:
+      - id: 128
+        name: sensor
+        type: integer
+        class: total_increasing
+        unit: Ah
+        mapping:
+          - scale: 1000
+
+  - entity: sensor
+    name: Accumulated electricity
+    dps:
+      - id: 129
+        name: sensor
+        type: integer
+        class: total_increasing
+        unit: kWh
+        mapping:
+          - scale: 1000
+    # Scale/unit inferred by analogy with DPS 123 ("ele") and confirmed
+    # DPS 126/127/128 (all x1000). Cross-check once against the app's
+    # "C/D capacity and power statistics" -> Total (kWh) field before
+    # trusting long-term logged values.
+
+  - entity: binary_sensor
+    class: problem
+    category: diagnostic
+    name: Alarm sign
+    dps:
+      - id: 132
+        type: string
+        optional: true
+        name: sensor
+        mapping:
+          - dps_val: null
+            value: false
+          - dps_val: ""
+            value: false
+          - value: true
+      - id: 132
+        type: string
+        optional: true
+        name: description
+        mapping:
+          - dps_val: null
+            value: ok
+          - dps_val: ""
+            value: ok
+          - dps_val: "off"
+            value: "off"
+          - dps_val: ovp
+            value: Over voltage
+          - dps_val: opp
+            value: Over power
+          - dps_val: lvp
+            value: Under voltage
+          - dps_val: otp
+            value: Over temperature
+
+  - entity: sensor
+    name: Total Cap
+    dps:
+      - id: 133
+        name: sensor
+        type: integer
+        class: total
+        unit: Ah
+        mapping:
+          - scale: 1000
+
+  - entity: sensor
+    name: Resistance
+    icon: "mdi:omega"
+    dps:
+      - id: 134
+        name: sensor
+        type: integer
+        class: measurement
+        unit: Ω
+        mapping:
+          - scale: 100
+
+  - entity: sensor
+    name: CPU temperature
+    category: diagnostic
+    class: temperature
+    dps:
+      - id: 135
+        name: sensor
+        type: integer
+        class: measurement
+        unit: C
+
+  - entity: select
+    name: Diverter size
+    category: config
+    icon: "mdi:resize"
+    dps:
+      - id: 136
+        type: string
+        name: option
+        mapping:
+          - dps_val: 30A
+            value: "30 amp"
+          - dps_val: 100A
+            value: "100 amp"
+          - dps_val: 200A
+            value: "200 amp"
+          - dps_val: 300A
+            value: "300 amp"
+          - dps_val: 400A
+            value: "400 amp"
+          - dps_val: 500A
+            value: "500 amp"
+          - dps_val: 600A
+            value: "600 amp"
+          - dps_val: 1000A
+            value: "1000 amp"
+
+  # --- Resolution status ---
+  # All DPS observed in raw dumps are now mapped and named, confirmed via
+  # a clean Tuya IoT Platform "Device Logs" DP extractor scan (code <-> dp_id).
+  # Remaining open item: the second dps_val for DPS 124 (Capacity metering
+  # mode's "C+D+" option) — see the select entity above.
