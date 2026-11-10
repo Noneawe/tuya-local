@@ -1,0 +1,670 @@
+# Oscal PowerMax 1800 SE (EU), product id lihkwwoeahoxmd3z, category bxsdy.
+#
+# Different hardware from oscal_powermax1800se_portablepower.yaml (product id
+# sgjrplhxfruooz9t): the dp ids overlap with the 2400 Pro / 6000 configs, but
+# several meanings differ on this unit. The cloud "code" names for this
+# product are unreliable (leftovers from a shared template), so the labels
+# below were checked against the Oscal app where marked [confirmed].
+# Only protocol 3.5 connects on this unit.
+#   dp12 = radio, dp19 = LED (not USB), dp37 = reverse energy total,
+#   dp106/107 = charge/discharge limit, dp114 = unknown function (there is no
+#   Bluetooth speaker), dp128 = slow charging limit power, dp139 has only
+#   six options, dp146-148 are firmware versions.
+# dp123, dp127 and dp142-145 are not mapped: meaning could not be confirmed.
+
+name: Portable power station
+
+products:
+  - id: lihkwwoeahoxmd3z
+    manufacturer: Oscal
+    model: PowerMax 1800 SE
+
+entities:
+  - entity: sensor
+    class: battery
+    dps:
+      - id: 1
+        type: integer
+        name: sensor
+        unit: "%"
+        class: measurement
+      - id: 112
+        type: integer
+        optional: true
+        name: power_packs
+
+  # [inferred] AC/DC role assumed by analogy with sibling Oscal profiles
+  # (same dp_id 6/7 across all 3 known SKUs) - confirm by toggling and
+  # checking which physical output responds.
+  - entity: switch
+    name: AC power
+    dps:
+      - id: 6
+        type: boolean
+        name: switch
+      - id: 102
+        type: string
+        optional: true
+        name: sw_version
+
+  - entity: switch
+    name: DC power
+    dps:
+      - id: 7
+        type: boolean
+        name: switch
+
+  # [confirmed] code=light_mode, enum range confirmed via cloud function schema
+  - entity: select
+    name: Light
+    icon: "mdi:led"
+    dps:
+      - id: 9
+        type: string
+        name: option
+        mapping:
+          - dps_val: "off"
+            value: "Off"
+          - dps_val: bright
+            value: Dim
+          - dps_val: high_bright
+            value: Bright
+          - dps_val: sos
+            value: Emergency
+          - dps_val: flash
+            value: Flash
+
+  # [confirmed] code=temp_current, range -128..200 via cloud spec
+  - entity: sensor
+    class: temperature
+    name: Battery temperature
+    category: diagnostic
+    dps:
+      - id: 10
+        type: integer
+        name: sensor
+        class: measurement
+      - id: 24
+        type: string
+        name: unit
+        mapping:
+          - dps_val: f
+            value: F
+          - value: C
+
+  # [inferred] code=radio - divergent from sibling files (dp12 there is
+  # "keytone"). Our device literally reports code "radio" - this is an
+  # FM radio toggle, not a key-click sound.
+  - entity: switch
+    name: Radio
+    category: config
+    dps:
+      - id: 12
+        type: boolean
+        optional: true
+        name: switch
+
+  # [inferred] code=switch_led - divergent from sibling files (dp19 there
+  # is "USB"). Our device literally reports code "switch_led".
+  - entity: switch
+    name: LED
+    dps:
+      - id: 19
+        type: boolean
+        optional: true
+        name: switch
+
+  - entity: select
+    translation_key: temperature_unit
+    category: config
+    dps:
+      - id: 24
+        type: string
+        name: option
+        mapping:
+          - dps_val: c
+            value: celsius
+          - dps_val: f
+            value: fahrenheit
+
+  # [confirmed] code=beep
+  - entity: switch
+    name: Beep
+    category: config
+    dps:
+      - id: 25
+        type: boolean
+        name: switch
+
+  # [inferred] code=reverse_energy_total - same code name as other Tuya
+  # energy meters, scale 100 -> kWh.
+  # Reused here on that precedent; NOT independently confirmed for this
+  # SKU - cross-check against the Oscal app's total energy figure.
+  - entity: sensor
+    name: Reverse energy total
+    class: energy
+    category: diagnostic
+    dps:
+      - id: 37
+        type: integer
+        optional: true
+        name: sensor
+        unit: kWh
+        class: total_increasing
+        mapping:
+          - scale: 100
+
+  # [inferred] code=alarm_propel_switch
+  - entity: switch
+    name: Notifications
+    category: config
+    dps:
+      - id: 101
+        type: boolean
+        optional: true
+        name: switch
+
+  # [confirmed] code=humidity_set is a leftover/wrong name on this SKU -
+  # app screenshot confirms this is actually "Charge limit", 70-100%.
+  - entity: number
+    name: Charge limit
+    category: config
+    icon: "mdi:battery-charging-90"
+    dps:
+      - id: 106
+        type: integer
+        optional: true
+        name: value
+        unit: "%"
+        range:
+          min: 70
+          max: 100
+
+  # [confirmed] code=dehumidify_set_value is a leftover/wrong name on this
+  # SKU - app screenshot confirms this is actually "Discharge limit", 0-30%.
+  - entity: number
+    name: Discharge limit
+    category: config
+    icon: "mdi:battery-20"
+    dps:
+      - id: 107
+        type: integer
+        optional: true
+        name: value
+        unit: "%"
+        range:
+          min: 0
+          max: 30
+
+  # [inferred] ambiguous naming, unit/semantics not independently
+  # confirmed - do not treat as authoritative "total input/output" like
+  # the sibling profiles' dp103/104 (different codes there).
+  - entity: sensor
+    name: Work power
+    category: diagnostic
+    dps:
+      - id: 103
+        type: integer
+        optional: true
+        name: sensor
+        unit: W
+
+  - entity: sensor
+    name: Power current
+    category: diagnostic
+    dps:
+      - id: 104
+        type: integer
+        optional: true
+        name: sensor
+
+  # [confirmed] code=ac_out_power
+  - entity: sensor
+    name: AC output
+    class: power
+    category: diagnostic
+    dps:
+      - id: 105
+        type: integer
+        optional: true
+        name: sensor
+        unit: W
+        class: measurement
+
+  # [inferred] code=remain_day
+  - entity: sensor
+    translation_key: time_remaining
+    category: diagnostic
+    class: duration
+    dps:
+      - id: 108
+        type: integer
+        optional: true
+        name: sensor
+        unit: d
+
+  # [inferred] code=close_lcd_time - option set copied from sibling
+  # profiles (same feature intent), only current value "1min" confirmed
+  # live; verify the rest of the range once the entity exists in HA.
+  - entity: select
+    name: Display timeout
+    icon: "mdi:television-ambient-light"
+    translation_key: timer
+    category: config
+    dps:
+      - id: 109
+        type: string
+        optional: true
+        name: option
+        mapping:
+          - dps_val: "1min"
+            value: "1m"
+          - dps_val: "5min"
+            value: "5m"
+          - dps_val: "10min"
+            value: "10m"
+          - dps_val: "30min"
+            value: "30m"
+          - dps_val: "never_close"
+            value: "cancel"
+
+  # [inferred] code=charge_discharge. Both sibling Oscal profiles agree
+  # on 0=standby/1=charging/2=discharging for this exact dp_id, which is
+  # decent cross-model evidence, but NOT confirmed for this unit - plug
+  # in / unplug the charger once live and check the state matches.
+  - entity: sensor
+    class: enum
+    translation_key: status
+    category: diagnostic
+    dps:
+      - id: 110
+        type: string
+        optional: true
+        name: sensor
+        mapping:
+          - dps_val: "0"
+            value: standby
+          - dps_val: "1"
+            value: charging
+          - dps_val: "2"
+            value: discharging
+
+  # [confirmed] code=ac_input_power
+  - entity: sensor
+    name: AC input
+    class: power
+    category: diagnostic
+    dps:
+      - id: 111
+        type: integer
+        optional: true
+        name: sensor
+        unit: W
+        class: measurement
+
+  # [confirmed] code=mppt_input_power
+  - entity: sensor
+    name: Solar input
+    class: power
+    category: diagnostic
+    dps:
+      - id: 113
+        type: integer
+        optional: true
+        name: sensor
+        unit: W
+        class: measurement
+
+  # [inferred->wrong] code=speaker_sw, copied from sibling profiles as
+  # "Bluetooth speaker" - user confirmed this physical unit has NO BT
+  # speaker, so that label is wrong on this SKU (same leftover/borrowed-
+  # code-name issue as dp106/dp107/dp128/dp146). The Oscal app itself
+  # shows this dp's row as an untranslated "Function Name" placeholder in
+  # the Charging and Discharging screen, not a real feature name - real
+  # meaning still unconfirmed, exposed generically pending further info.
+  - entity: switch
+    name: Function switch
+    category: config
+    dps:
+      - id: 114
+        type: boolean
+        optional: true
+        name: switch
+
+  # [confirmed] code=grid_sw
+  - entity: switch
+    name: Grid feed-in
+    category: config
+    dps:
+      - id: 115
+        type: boolean
+        optional: true
+        name: switch
+
+  # [confirmed] code=dc_out_p
+  - entity: sensor
+    name: DC output
+    class: power
+    category: diagnostic
+    dps:
+      - id: 116
+        type: integer
+        optional: true
+        name: sensor
+        unit: W
+        class: measurement
+
+  # [inferred] code=usb_out_p - scale 10 copied from both sibling
+  # profiles for this exact dp_id; unit was 0 W live so scale could not
+  # be cross-checked here yet.
+  - entity: sensor
+    name: USB output
+    class: power
+    category: diagnostic
+    dps:
+      - id: 117
+        type: integer
+        optional: true
+        name: sensor
+        unit: W
+        class: measurement
+        mapping:
+          - scale: 10
+
+  # [inferred] code=morse_code - plausibly the custom message/pattern for
+  # the "sos" light mode; matches sibling profiles' "Emergency message"
+  # text field at the same dp_id.
+  - entity: text
+    name: Emergency message
+    category: config
+    icon: "mdi:dots-horizontal"
+    dps:
+      - id: 118
+        type: string
+        optional: true
+        name: value
+        range:
+          min: 0
+          max: 255
+
+  # [confirmed] code=cook_power is a leftover/wrong name on this SKU - app
+  # screenshot ("Slow Charging Limit Power" slider, mislabelled "Cook
+  # Power" in the UI itself) confirms this is the AC slow-charge power
+  # limit, 100-800W.
+  - entity: number
+    name: Slow charging limit power
+    category: config
+    class: power
+    icon: "mdi:battery-charging-90"
+    dps:
+      - id: 128
+        type: integer
+        optional: true
+        name: value
+        unit: W
+        range:
+          min: 100
+          max: 800
+
+  # [inferred] code=grid_power - exposed read-only (no guessed numeric
+  # range for a writable limit); unclear if this is a live grid draw
+  # reading or a configured limit default.
+  - entity: sensor
+    name: Grid power
+    category: diagnostic
+    dps:
+      - id: 119
+        type: integer
+        optional: true
+        name: sensor
+        unit: W
+
+  # [confirmed] codes addpack1soc/addpack1_temp/addpack1_p - matches
+  # sibling profiles' Pack 1 dp_ids exactly.
+  - entity: sensor
+    name: Pack 1
+    class: battery
+    category: diagnostic
+    dps:
+      - id: 120
+        type: integer
+        optional: true
+        name: sensor
+        unit: "%"
+        class: measurement
+  - entity: sensor
+    name: Pack 1 temperature
+    class: temperature
+    category: diagnostic
+    dps:
+      - id: 121
+        type: integer
+        optional: true
+        name: sensor
+        class: measurement
+  - entity: sensor
+    name: Pack 1 output
+    class: power
+    category: diagnostic
+    dps:
+      - id: 122
+        type: integer
+        optional: true
+        name: sensor
+        unit: W
+        class: measurement
+
+  - entity: sensor
+    name: Pack 2
+    class: battery
+    category: diagnostic
+    dps:
+      - id: 124
+        type: integer
+        optional: true
+        name: sensor
+        unit: "%"
+        class: measurement
+  - entity: sensor
+    name: Pack 2 temperature
+    class: temperature
+    category: diagnostic
+    dps:
+      - id: 125
+        type: integer
+        optional: true
+        name: sensor
+        class: measurement
+  - entity: sensor
+    name: Pack 2 output
+    class: power
+    category: diagnostic
+    dps:
+      - id: 126
+        type: integer
+        optional: true
+        name: sensor
+        unit: W
+        class: measurement
+
+  - entity: sensor
+    name: Pack 3
+    class: battery
+    category: diagnostic
+    dps:
+      - id: 129
+        type: integer
+        optional: true
+        name: sensor
+        unit: "%"
+        class: measurement
+  - entity: sensor
+    name: Pack 3 temperature
+    class: temperature
+    category: diagnostic
+    dps:
+      - id: 130
+        type: integer
+        optional: true
+        name: sensor
+        class: measurement
+  - entity: sensor
+    name: Pack 3 output
+    class: power
+    category: diagnostic
+    dps:
+      - id: 131
+        type: integer
+        optional: true
+        name: sensor
+        unit: W
+        class: measurement
+
+  - entity: sensor
+    name: Pack 4
+    class: battery
+    category: diagnostic
+    dps:
+      - id: 133
+        type: integer
+        optional: true
+        name: sensor
+        unit: "%"
+        class: measurement
+  - entity: sensor
+    name: Pack 4 temperature
+    class: temperature
+    category: diagnostic
+    dps:
+      - id: 134
+        type: integer
+        optional: true
+        name: sensor
+        class: measurement
+  - entity: sensor
+    name: Pack 4 output
+    class: power
+    category: diagnostic
+    dps:
+      - id: 135
+        type: integer
+        optional: true
+        name: sensor
+        unit: W
+        class: measurement
+
+  - entity: sensor
+    name: Pack 5
+    class: battery
+    category: diagnostic
+    dps:
+      - id: 137
+        type: integer
+        optional: true
+        name: sensor
+        unit: "%"
+        class: measurement
+  - entity: sensor
+    name: Pack 5 temperature
+    class: temperature
+    category: diagnostic
+    dps:
+      - id: 138
+        type: integer
+        optional: true
+        name: sensor
+        class: measurement
+  - entity: sensor
+    name: Pack 5 output
+    class: power
+    category: diagnostic
+    dps:
+      - id: 141
+        type: integer
+        optional: true
+        name: sensor
+        unit: W
+        class: measurement
+
+  # [confirmed] code=ac_close_time - option set confirmed via app
+  # screenshot (2026-09-02): this SKU has only 6 options, no 6hour/24hour
+  # (those exist on the sibling 2400pro/6000 models but not here).
+  - entity: select
+    name: AC standby time
+    class: timer
+    category: config
+    icon: "mdi:timer-outline"
+    dps:
+      - id: 139
+        type: string
+        optional: true
+        name: option
+        mapping:
+          - dps_val: never_close
+            value: cancel
+          - dps_val: "30min"
+            value: "30m"
+          - dps_val: "1hour"
+            value: "1h"
+          - dps_val: "2hour"
+            value: "2h"
+          - dps_val: "4hour"
+            value: "4h"
+          - dps_val: "12hour"
+            value: "12h"
+
+  # [inferred] code=machine_close_time - assumed to share the same
+  # trimmed 6-option set as dp139 (AC standby time) on this SKU; not
+  # independently confirmed via a dedicated app screen.
+  - entity: select
+    name: DC standby time
+    class: timer
+    category: config
+    icon: "mdi:timer-outline"
+    dps:
+      - id: 140
+        type: string
+        optional: true
+        name: option
+        mapping:
+          - dps_val: never_close
+            value: cancel
+          - dps_val: "30min"
+            value: "30m"
+          - dps_val: "1hour"
+            value: "1h"
+          - dps_val: "2hour"
+            value: "2h"
+          - dps_val: "4hour"
+            value: "4h"
+          - dps_val: "12hour"
+            value: "12h"
+
+  # [confirmed] firmware/version strings - read-only, low risk. Label
+  # confirmed via app screenshot: "Inverter software version" (not "PCS").
+  - entity: sensor
+    name: Inverter software version
+    category: diagnostic
+    dps:
+      - id: 146
+        type: string
+        optional: true
+        name: sensor
+
+  - entity: sensor
+    name: BMS firmware version
+    category: diagnostic
+    dps:
+      - id: 147
+        type: string
+        optional: true
+        name: sensor
+
+  - entity: sensor
+    name: MPPT firmware version
+    category: diagnostic
+    dps:
+      - id: 148
+        type: string
+        optional: true
+        name: sensor
